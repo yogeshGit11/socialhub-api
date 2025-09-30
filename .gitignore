@@ -1,0 +1,92 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# VS Code settings
+.vscode/
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.pytest_cache/
+
+# Pyre type checker
+.pyre/
+
+# Pytype
+.pytype/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pydantic compiled models
+__pydantic__/ 
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# dotenv environment variables
+.env
+.env.*
+!.env.example
+
+# Local SQLite DBs
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# IDEs
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Docker
+*.pid
+*.pid.lock
+*.sock
+docker-compose.override.yml
