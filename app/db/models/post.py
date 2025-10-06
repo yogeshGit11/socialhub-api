@@ -13,4 +13,4 @@ class Post(Base):
 
     author = relationship("User", back_populates="posts")
     likes = relationship("Like", back_populates="post")
-    comments = relationship("Comment", back_populates="post")
+    comments = relationship("Comment", back_populates="post", lazy="selectin")
