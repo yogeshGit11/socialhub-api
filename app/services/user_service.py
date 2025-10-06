@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from app.db.models.user import User
 from app.db.models.follower import Follower
 from app.core import security
+from app.websocket.endpoints import manager
 
 
 async def get_by_id(db: AsyncSession, user_id: int):
@@ -32,6 +33,10 @@ async def follow_user(db: AsyncSession, user_id: int, current_user: User):
     follow = Follower(follower_id=current_user.id, user_id=target_user.id)
     db.add(follow)
     await db.commit()
+
+    # Send real-time notification to user being followed
+    message = f"{current_user.username} started following you."
+    await manager.send_to_user(target_user.id, message)
 
     return target_user.username
 

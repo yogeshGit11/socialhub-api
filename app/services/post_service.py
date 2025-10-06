@@ -8,6 +8,7 @@ from app.db.models import post as post_model, like as like_model, user as user_m
 from app.core.config import settings
 from app.schemas import post as post_schema
 from sqlalchemy.orm import selectinload
+from app.websocket.endpoints import manager
 
 async def create_post_service(
     payload: post_schema.PostCreate,
@@ -79,5 +80,10 @@ async def like_post_service(
     db.add(new_like)
     await db.commit()
     await db.refresh(new_like)
+
+    # Send real-time notification to post author
+    if post.author_id != current_user.id:
+        message = f"{current_user.username} liked your post."
+        await manager.send_to_user(post.author_id, message)
 
     return new_like
