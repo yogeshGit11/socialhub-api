@@ -1,16 +1,18 @@
 import os
 import shutil
 from uuid import uuid4
-from fastapi import UploadFile, HTTPException, status
+from fastapi import UploadFile, HTTPException, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.db.models import post as post_model, like as like_model, user as user_model
+from app.db.models import post as post_model, like as like_model, user as user_model, follower as follower_model
 from app.core.config import settings
 from app.schemas import post as post_schema
 from sqlalchemy.orm import selectinload
 from app.websocket.endpoints import manager
+from app.email.tasks import notify_followers_new_post
 
 async def create_post_service(
+    background_tasks: BackgroundTasks,
     payload: post_schema.PostCreate,
     image: UploadFile,
     db: AsyncSession,
@@ -44,6 +46,39 @@ async def create_post_service(
     db.add(new_post)
     await db.commit()
     await db.refresh(new_post)
+
+    #get all followers of the current user
+    result = await db.execute(
+        select(follower_model.Follower).where(
+            follower_model.Follower.user_id == current_user.id
+        )
+    )
+    followers = result.scalars().all()
+    follower_ids = [f.follower_id for f in followers]
+
+    #real-time notification to followers
+    message = f"{current_user.username} has created a new post."
+    for follower_id in follower_ids:
+        print(f"Follower ID: {follower_id}")
+        await manager.send_to_user(follower_id, message)
+
+    if follower_ids:
+        result = await db.execute(
+            select(user_model.User).where(user_model.User.id.in_(follower_ids))
+        )
+        follower_users = result.scalars().all()
+        follower_emails = [user.email for user in follower_users if user.email]
+    else:
+        follower_emails = []
+
+    if follower_emails:
+        background_tasks.add_task(
+            notify_followers_new_post,
+            background_tasks,
+            follower_emails,
+            new_post.content,
+            current_user.username
+        )
 
     return new_post
 

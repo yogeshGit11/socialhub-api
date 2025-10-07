@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app.schemas import post as post_schema
@@ -12,12 +12,13 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 @router.post("/create-post", response_model=ResponseModel[post_schema.PostOut])
 async def create_post(
+    background_tasks: BackgroundTasks,
     content: str = Form(...),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
     current_user: user_model.User = Depends(get_current_user)
 ):
-    new_post = await post_service.create_post_service(content, image, db, current_user)
+    new_post = await post_service.create_post_service(background_tasks, content, image, db, current_user)
     return ResponseModel(
         success=True,
         message="Post added successfully",

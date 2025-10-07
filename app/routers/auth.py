@@ -1,20 +1,22 @@
-from fastapi import APIRouter, Depends, UploadFile, Form, File
+from fastapi import APIRouter, Depends, UploadFile, Form, File, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas import user as user_schema
 from app.schemas import auth as auth_schema
 from app.schemas.response import ResponseModel
 from app.db.session import get_db
 from app.services import auth_service
+from app.email.tasks import send_welcome_email
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/signup", response_model=ResponseModel[user_schema.UserOut])
 async def signup_user(
+    background_tasks: BackgroundTasks,
     email: str = Form(...),
     username: str = Form(...),
     password: str = Form(...),
     profile_image: UploadFile = File(None),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db)
 ):
     payload = user_schema.UserCreate(
         email=email,
@@ -24,6 +26,8 @@ async def signup_user(
     )
 
     new_user = await auth_service.signup_user(payload, db, profile_image)
+    background_tasks.add_task(send_welcome_email, background_tasks, new_user.email, new_user.username)
+
     return ResponseModel(
         success=True,
         message="User registered successfully",
