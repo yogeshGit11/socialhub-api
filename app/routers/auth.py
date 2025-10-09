@@ -6,6 +6,7 @@ from app.schemas.response import ResponseModel
 from app.db.session import get_db
 from app.services import auth_service
 from app.email.tasks import send_welcome_email
+from app.dependencies.rate_limit import limit_login_attempts
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -35,7 +36,7 @@ async def signup_user(
     )
 
 @router.post("/login", response_model=ResponseModel[auth_schema.Token])
-async def login(payload: user_schema.UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(payload: user_schema.UserLogin, db: AsyncSession = Depends(get_db), login_limit = Depends(limit_login_attempts)):
     tokens = await auth_service.login_user(payload, db)
     return ResponseModel(
         success=True,

@@ -27,6 +27,14 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = Field(..., env="CELERY_BROKER_URL")
     CELERY_RESULT_BACKEND: str = Field(..., env="CELERY_RESULT_BACKEND")
 
+    # Redis settings for rate limiting
+    REDIS_URL: str = Field(..., env="REDIS_URL")
+
+    # Rate limiting settings for login attempts
+    LOGIN_REDIS_PREFIX: str = Field("login_attempts:", env="LOGIN_REDIS_PREFIX")
+    LOGIN_TIME_WINDOW: int = Field(60, env="LOGIN_TIME_WINDOW")
+    LOGIN_ATTEMPTS_LIMIT: int = Field(5, env="LOGIN_ATTEMPTS_LIMIT")
+
     class Config:
         env_file = ".env"
         case_sensitive = True

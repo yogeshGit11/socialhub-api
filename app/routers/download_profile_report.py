@@ -4,11 +4,12 @@ from app.celery.tasks.pdf_tasks import generate_user_profile_pdf
 from io import BytesIO
 import base64
 from app.dependencies.user_deps import get_current_user
+from app.dependencies.rate_limit import limit_profile_downloads
 
 router = APIRouter(prefix="/user-profile", tags=["Profile Report"])
 
 @router.get("/download", response_class=StreamingResponse)
-async def download_profile(current_user=Depends(get_current_user)):
+async def download_profile(current_user=Depends(get_current_user), limit=Depends(limit_profile_downloads)):
     user_id = current_user.id
     task_result = generate_user_profile_pdf.delay(user_id)
     base64_pdf = task_result.get(timeout=5)
