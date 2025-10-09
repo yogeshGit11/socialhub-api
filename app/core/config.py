@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = Field(..., env="SMTP_PASSWORD")
     SMTP_USE_TLS: bool = Field(True, env="SMTP_USE_TLS")
 
+    # Celery settings
+    CELERY_BROKER_URL: str = Field(..., env="CELERY_BROKER_URL")
+    CELERY_RESULT_BACKEND: str = Field(..., env="CELERY_RESULT_BACKEND")
+
     class Config:
         env_file = ".env"
         case_sensitive = True

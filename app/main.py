@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.core.config import settings
 from app.db.session import engine, Base
-from app.routers import auth, users, posts, comments
+from app.routers import auth, users, posts, comments, download_profile_report
 from app.middleware.request_logger import RequestLoggerMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from app.websocket.endpoints import router as websocket_router
@@ -22,6 +22,7 @@ app.include_router(users.router)
 app.include_router(posts.router)
 app.include_router(comments.router)
 app.include_router(websocket_router)
+app.include_router(download_profile_report.router)
 
 @app.get("/")
 def home():
