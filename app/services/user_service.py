@@ -69,10 +69,10 @@ async def change_password(payload, db: AsyncSession, current_user: User):
     result = await db.execute(select(User).where(User.id == current_user.id))
     user = result.scalars().first()
 
-    if not security.verify_password(payload.old_password, user.hashed_password):
+    if not security.verify_password(payload.old_password, user.password):
         raise HTTPException(status_code=400, detail="Your old_password is incorrect")
 
-    user.hashed_password = security.hash_password(payload.new_password)
+    user.password = security.hash_password(payload.new_password)
     db.add(user)
     await db.commit()
     return user

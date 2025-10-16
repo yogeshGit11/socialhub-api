@@ -6,6 +6,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     username: str
     profile_image: Optional[str]
+    date_of_birth: str
     password: str
 
 class UserOut(BaseModel):

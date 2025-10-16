@@ -42,7 +42,8 @@ async def signup_user(payload: user_schema.UserCreate, db: AsyncSession, profile
     new_user = user_model.User(
         username=payload.username,
         email=payload.email,
-        hashed_password=security.hash_password(payload.password),
+        password=security.hash_password(payload.password),
+        date_of_birth=payload.date_of_birth,
         profile_image=image_path,
     )
 
@@ -55,7 +56,7 @@ async def login_user(payload: user_schema.UserLogin, db: AsyncSession):
     result = await db.execute(select(user_model.User).filter(user_model.User.email == payload.email))
     user = result.scalars().first()
 
-    if not user or not security.verify_password(payload.password, user.hashed_password):
+    if not user or not security.verify_password(payload.password, user.password):
         raise HTTPException(status_code=401, detail="Login failed. Incorrect email or password.")
 
     access_token = security.create_access_token(str(user.id))
